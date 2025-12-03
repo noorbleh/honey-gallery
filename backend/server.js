@@ -13,18 +13,14 @@ app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ extended: true, limit: "50mb" }));
 
 /**
- * INIT FIREBASE ADMIN
+ * INIT FIREBASE ADMIN – RAILWAY SAFE VERSION
  */
-let credential;
-
-if (process.env.GSERVICE_JSON) {
-  // RAILWAY DEPLOYMENT (SAFE)
-  credential = admin.credential.cert(JSON.parse(process.env.GSERVICE_JSON));
-} else {
-  // LOCAL DEVELOPMENT ONLY
-  const svcPath = path.join(__dirname, "serviceAccountKey.json");
-  credential = admin.credential.cert(require(svcPath));
+if (!process.env.GSERVICE_JSON) {
+  console.error("❌ Missing GSERVICE_JSON env variable");
+  process.exit(1);
 }
+
+let credential = admin.credential.cert(JSON.parse(process.env.GSERVICE_JSON));
 
 admin.initializeApp({ credential });
 const db = admin.firestore();
