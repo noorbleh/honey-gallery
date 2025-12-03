@@ -15,7 +15,7 @@ export default function HomePage() {
         style={{
           height: "100vh",
           width: "100%",
-          backgroundImage: "https://res.cloudinary.com/doqshkcln/image/upload/v1764773413/hero_suairk.jpg",
+          backgroundImage: "url('/hero.jpg')",
           backgroundSize: "cover",
           backgroundPosition: "center",
           backgroundAttachment: "fixed", // ⭐ HERO STAYS STILL
