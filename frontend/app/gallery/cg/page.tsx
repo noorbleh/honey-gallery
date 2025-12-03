@@ -75,7 +75,7 @@ export default function CgCollection() {
 
       if (!audio) {
         audio = document.createElement("audio");
-        audio.src = "/ambient.mp3";
+        audio.src = "https://res.cloudinary.com/doqshkcln/video/upload/v1764772522/ambient_obqtzy.mp3";
         audio.id = "ambient-audio";
         audio.loop = true;
         audio.volume = 0.17;
