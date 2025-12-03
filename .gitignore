@@ -1,0 +1,27 @@
+# Node
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Env files
+.env
+.env.local
+.env.production
+.env.development
+
+# Firebase key
+serviceAccountKey.json
+*.pem
+
+# Next.js build files
+.next/
+out/
+dist/
+
+# Uploads
+backend/uploads/
+frontend/public/
+
+# OSX + system files
+.DS_Store
+Thumbs.db
