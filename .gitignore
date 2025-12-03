@@ -20,7 +20,6 @@ dist/
 
 # Uploads
 backend/uploads/
-frontend/public/
 
 # OSX + system files
 .DS_Store
