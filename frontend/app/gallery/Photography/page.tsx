@@ -44,7 +44,7 @@ export default function PhotographyPage() {
       let audio = document.getElementById("ambient-audio") as HTMLAudioElement | null;
       if (!audio) {
         audio = document.createElement("audio");
-        audio.src = "https://res.cloudinary.com/doqshkcln/video/upload/v1764772522/ambient_obqtzy.mp3";
+        audio.src = "hhttps://res.cloudinary.com/doqshkcln/raw/upload/v1764772522/ambient_obqtzy.mp3";
         audio.id = "ambient-audio";
         audio.loop = true;
         audio.volume = 0.18;

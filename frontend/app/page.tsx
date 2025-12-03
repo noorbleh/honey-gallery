@@ -15,7 +15,7 @@ export default function HomePage() {
         style={{
           height: "100vh",
           width: "100%",
-          backgroundImage: "url('/hero.jpg')",
+          backgroundImage: "https://res.cloudinary.com/doqshkcln/image/upload/v1764773413/hero_suairk.jpg",
           backgroundSize: "cover",
           backgroundPosition: "center",
           backgroundAttachment: "fixed", // ⭐ HERO STAYS STILL
@@ -100,7 +100,7 @@ export default function HomePage() {
             }}
           >
             <img
-              src="/boyfriend.jpg"
+              src="https://res.cloudinary.com/doqshkcln/image/upload/v1764773414/boyfriend_ijdfje.jpg"
               style={{
                 width: "100%",
                 borderRadius: "10px",
@@ -288,7 +288,7 @@ export default function HomePage() {
             >
               {/* Painting Image */}
               <img
-                src="/prints-preview.jpg"
+                src="https://res.cloudinary.com/doqshkcln/image/upload/v1764773413/prints-preview_lxcbpv.jpg"
                 style={{
                   width: "100%",
                   height: "430px",

@@ -11,7 +11,7 @@ export default function PrintsPage() {
       <section
         style={{
           height: "90vh",
-          backgroundImage: "url('/prints-hero.jpg')",
+          backgroundImage: "https://res.cloudinary.com/doqshkcln/image/upload/v1764773413/prints-hero_uhr7e3.jpg",
           backgroundSize: "cover",
           backgroundPosition: "center",
           backgroundAttachment: "fixed", // ⭐ PARALLAX MAGIC
