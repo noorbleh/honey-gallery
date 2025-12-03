@@ -16,12 +16,13 @@ app.use(express.urlencoded({ extended: true, limit: "50mb" }));
  * INIT FIREBASE ADMIN
  */
 let credential;
+
 if (process.env.GSERVICE_JSON) {
+  // RAILWAY DEPLOYMENT (SAFE)
   credential = admin.credential.cert(JSON.parse(process.env.GSERVICE_JSON));
 } else {
-  const svcPath =
-    process.env.GOOGLE_APPLICATION_CREDENTIALS ||
-    path.join(__dirname, "serviceAccountKey.json");
+  // LOCAL DEVELOPMENT ONLY
+  const svcPath = path.join(__dirname, "serviceAccountKey.json");
   credential = admin.credential.cert(require(svcPath));
 }
 
@@ -106,10 +107,7 @@ app.get("/artworks", async (req, res) => {
         .orderBy("createdAt", "desc")
         .get();
     } else {
-      snap = await db
-        .collection("artworks")
-        .orderBy("createdAt", "desc")
-        .get();
+      snap = await db.collection("artworks").orderBy("createdAt", "desc").get();
     }
 
     const rows = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
@@ -131,7 +129,6 @@ app.get("/collections", async (req, res) => {
       if (col) set.add(col);
     });
 
-    // DEFAULT COLLECTIONS (ALWAYS SHOW THESE)
     const defaultCollections = [
       "C&G Collection",
       "Wall Collection",
@@ -161,12 +158,8 @@ app.delete("/artworks/:id", verifyToken, async (req, res) => {
 });
 
 // ---------------- ROOT ----------------
-app.get("/", (req, res) =>
-  res.send("Backend is live!")
-);
+app.get("/", (req, res) => res.send("Backend is live!"));
 
 // ---------------- START ----------------
 const PORT = process.env.PORT || 8080;
-app.listen(PORT, () =>
-  console.log(`Backend running on port ${PORT}`)
-);
+app.listen(PORT, () => console.log(`Backend running on port ${PORT}`));
