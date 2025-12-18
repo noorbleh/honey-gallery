@@ -16,13 +16,13 @@ app.use(express.urlencoded({ extended: true, limit: "50mb" }));
  * INIT FIREBASE ADMIN – RAILWAY SAFE VERSION
  */
 if (!process.env.GSERVICE_JSON) {
-  console.error("❌ Missing GSERVICE_JSON env variable");
-  process.exit(1);
+  console.warn("⚠️ GSERVICE_JSON not found at startup, waiting for Railway envs");
 }
 
 const credential = admin.credential.cert(
   JSON.parse(process.env.GSERVICE_JSON)
 );
+
 admin.initializeApp({ credential });
 const db = admin.firestore();
 
@@ -153,7 +153,7 @@ app.delete("/artworks/:id", verifyToken, async (req, res) => {
   }
 });
 
-// ---------------- CONTACT FORM (EMAIL) ----------------
+// ---------------- CONTACT FORM ----------------
 const transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
