@@ -5,9 +5,9 @@ import WaxSeal from "../../components/WaxSeal";
 
 export default function ContactPage() {
   const [form, setForm] = useState({ name: "", email: "", message: "" });
-  const [status, setStatus] = useState<"idle" | "sending" | "success" | "error">(
-    "idle"
-  );
+  const [status, setStatus] = useState<
+    "idle" | "sending" | "success" | "error"
+  >("idle");
 
   const handleChange = (e: any) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -64,7 +64,7 @@ export default function ContactPage() {
           background: "#c7a66a",
           margin: "10px auto 50px",
         }}
-      ></div>
+      />
 
       <div
         style={{
@@ -177,7 +177,7 @@ export default function ContactPage() {
                   onChange={handleChange}
                   required
                   style={inputStyle}
-                ></textarea>
+                />
               </div>
 
               <button
@@ -193,7 +193,6 @@ export default function ContactPage() {
                   fontWeight: 600,
                   marginTop: "10px",
                   cursor: "pointer",
-                  transition: "0.25s",
                 }}
               >
                 {status === "sending" ? "Sending…" : "Send Message"}
