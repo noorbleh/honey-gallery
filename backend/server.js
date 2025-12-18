@@ -1,6 +1,7 @@
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
+const path = require("path");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const admin = require("firebase-admin");
@@ -8,48 +9,32 @@ const nodemailer = require("nodemailer");
 
 const app = express();
 
-/* --------- CORS (NODE 22 SAFE) --------- */
-app.use(
-  cors({
-    origin: [
-      "https://honeysartgalleryy.vercel.app",
-      "https://honeysartgalleryy-git-main-noorblehs-projects.vercel.app",
-    ],
-    methods: ["GET", "POST", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-  })
-);
-
+/* ---------------- MIDDLEWARE ---------------- */
+app.use(cors());
 app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ extended: true, limit: "50mb" }));
 
-const SECRET = process.env.JWT_SECRET || "HONEY_GALLERY_SECRET";
+/* ✅ SAFE PREFLIGHT (NO *) */
+app.options("/contact", cors());
 
-/* --------- FIREBASE LAZY INIT --------- */
-let db;
-function getDB() {
-  if (db) return db;
-
-  if (!process.env.GSERVICE_JSON) {
-    throw new Error("GSERVICE_JSON missing");
-  }
-
-  if (!admin.apps.length) {
-    admin.initializeApp({
-      credential: admin.credential.cert(
-        JSON.parse(process.env.GSERVICE_JSON)
-      ),
-    });
-  }
-
-  db = admin.firestore();
-  return db;
+/**
+ * INIT FIREBASE ADMIN – RAILWAY SAFE VERSION
+ */
+if (!process.env.GSERVICE_JSON) {
+  console.error("❌ Missing GSERVICE_JSON env variable");
+  process.exit(1);
 }
 
-/* --------- AUTH --------- */
+let credential = admin.credential.cert(JSON.parse(process.env.GSERVICE_JSON));
+admin.initializeApp({ credential });
+const db = admin.firestore();
+
+const SECRET = process.env.JWT_SECRET || "HONEY_GALLERY_SECRET";
+
+/* ---------------- AUTH MIDDLEWARE ---------------- */
 function verifyToken(req, res, next) {
-  const token = req.headers.authorization;
-  if (!token) return res.status(401).json({ message: "No token" });
+  const token = req.headers["authorization"];
+  if (!token) return res.status(401).json({ message: "No token provided" });
 
   jwt.verify(token, SECRET, (err, decoded) => {
     if (err) return res.status(403).json({ message: "Invalid token" });
@@ -58,11 +43,10 @@ function verifyToken(req, res, next) {
   });
 }
 
-/* --------- LOGIN --------- */
+/* ---------------- LOGIN ---------------- */
 app.post("/login", async (req, res) => {
   try {
     const { username, password } = req.body;
-    const db = getDB();
 
     const q = await db
       .collection("admins")
@@ -73,59 +57,139 @@ app.post("/login", async (req, res) => {
     if (q.empty) return res.status(404).json({ message: "Admin not found" });
 
     const doc = q.docs[0];
-    const match = await bcrypt.compare(password, doc.data().passwordHash);
+    const data = doc.data();
+
+    const match = await bcrypt.compare(password, data.passwordHash);
     if (!match) return res.status(400).json({ message: "Wrong password" });
 
     const token = jwt.sign({ id: doc.id }, SECRET, { expiresIn: "7d" });
     res.json({ token });
   } catch (err) {
-    console.error(err);
+    console.error("login error", err);
     res.status(500).json({ message: "Server error" });
   }
 });
 
-/* --------- CONTACT EMAIL --------- */
-const transporter = nodemailer.createTransport({
-  service: "gmail",
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
+/* ---------------- ADD ARTWORK ---------------- */
+app.post("/addArt", verifyToken, async (req, res) => {
+  try {
+    const { title, description, year, collection, imageUrl } = req.body;
+
+    if (!imageUrl)
+      return res.status(400).json({ message: "Image URL missing" });
+
+    const docRef = await db.collection("artworks").add({
+      title: title || "",
+      description: description || "",
+      year: year || "",
+      collection: collection || null,
+      imageUrl,
+      createdAt: admin.firestore.FieldValue.serverTimestamp(),
+    });
+
+    res.json({ message: "Artwork saved", id: docRef.id });
+  } catch (err) {
+    console.error("addArt error", err);
+    res.status(500).json({ message: "Upload failed" });
+  }
 });
 
+/* ---------------- GET ARTWORKS ---------------- */
+app.get("/artworks", async (req, res) => {
+  try {
+    const c = req.query.collection;
+    let snap;
+
+    if (c) {
+      snap = await db
+        .collection("artworks")
+        .where("collection", "==", c)
+        .orderBy("createdAt", "desc")
+        .get();
+    } else {
+      snap = await db.collection("artworks").orderBy("createdAt", "desc").get();
+    }
+
+    const rows = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+    res.json(rows);
+  } catch (err) {
+    console.error("get artworks error", err);
+    res.status(500).json({ message: "Error fetching artworks" });
+  }
+});
+
+/* ---------------- GET COLLECTION LIST ---------------- */
+app.get("/collections", async (req, res) => {
+  try {
+    const snap = await db.collection("artworks").get();
+    const set = new Set();
+
+    snap.docs.forEach((d) => {
+      const col = d.data().collection;
+      if (col) set.add(col);
+    });
+
+    const defaultCollections = [
+      "C&G Collection",
+      "Wall Collection",
+      "Wc Collection",
+      "Photography",
+      "Postcards",
+    ];
+
+    const merged = Array.from(new Set([...defaultCollections, ...set]));
+    res.json(merged.sort());
+  } catch (err) {
+    console.error("get collections error", err);
+    res.status(500).json({ message: "Error fetching collections" });
+  }
+});
+
+/* ---------------- DELETE ARTWORK ---------------- */
+app.delete("/artworks/:id", verifyToken, async (req, res) => {
+  try {
+    await db.collection("artworks").doc(req.params.id).delete();
+    res.json({ message: "Deleted" });
+  } catch (err) {
+    console.error("delete error", err);
+    res.status(500).json({ message: "Error deleting artwork" });
+  }
+});
+
+/* ---------------- CONTACT (NEW, ONLY ADDITION) ---------------- */
 app.post("/contact", async (req, res) => {
   try {
-    console.log("📩 CONTACT:", req.body);
-
     const { name, email, message } = req.body;
-    if (!name || !email || !message) {
+    if (!name || !email || !message)
       return res.status(400).json({ message: "Missing fields" });
-    }
+
+    console.log("📩 Contact request:", name, email);
+
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+      },
+    });
 
     await transporter.sendMail({
       from: `"Honey’s Art Gallery" <${process.env.EMAIL_USER}>`,
-      to: process.env.EMAIL_USER,
-      replyTo: email,
-      subject: `New message from ${name}`,
-      html: `
-        <p><b>Name:</b> ${name}</p>
-        <p><b>Email:</b> ${email}</p>
-        <p>${message}</p>
-      `,
+      to: email,
+      subject: "We received your message 💌",
+      html: `<p>Hi ${name},</p><p>${message}</p><p>— Honey</p>`,
     });
 
-    res.json({ success: true });
+    res.json({ message: "Email sent" });
   } catch (err) {
-    console.error("EMAIL ERROR:", err);
+    console.error("❌ Email error:", err);
     res.status(500).json({ message: "Email failed" });
   }
 });
 
-/* --------- ROOT --------- */
-app.get("/", (_, res) => res.send("Backend live"));
+/* ---------------- ROOT ---------------- */
+app.get("/", (req, res) => res.send("Backend is live!"));
 
-/* --------- START --------- */
+/* ---------------- START ---------------- */
 const PORT = process.env.PORT || 8080;
-app.listen(PORT, "0.0.0.0", () =>
-  console.log(`Backend running on port ${PORT}`)
-);
+app.listen(PORT, () => console.log(`Backend running on port ${PORT}`));
