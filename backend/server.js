@@ -1,7 +1,6 @@
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
-const path = require("path");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const admin = require("firebase-admin");
@@ -14,18 +13,16 @@ app.use(cors());
 app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ extended: true, limit: "50mb" }));
 
-/* ✅ SAFE PREFLIGHT (NO *) */
-app.options("/contact", cors());
-
-/**
- * INIT FIREBASE ADMIN – RAILWAY SAFE VERSION
- */
+/* ---------------- FIREBASE INIT ---------------- */
 if (!process.env.GSERVICE_JSON) {
   console.error("❌ Missing GSERVICE_JSON env variable");
   process.exit(1);
 }
 
-let credential = admin.credential.cert(JSON.parse(process.env.GSERVICE_JSON));
+const credential = admin.credential.cert(
+  JSON.parse(process.env.GSERVICE_JSON)
+);
+
 admin.initializeApp({ credential });
 const db = admin.firestore();
 
@@ -107,7 +104,10 @@ app.get("/artworks", async (req, res) => {
         .orderBy("createdAt", "desc")
         .get();
     } else {
-      snap = await db.collection("artworks").orderBy("createdAt", "desc").get();
+      snap = await db
+        .collection("artworks")
+        .orderBy("createdAt", "desc")
+        .get();
     }
 
     const rows = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
@@ -156,15 +156,18 @@ app.delete("/artworks/:id", verifyToken, async (req, res) => {
   }
 });
 
-/* ---------------- CONTACT (NEW, ONLY ADDITION) ---------------- */
+/* ---------------- CONTACT (ADMIN + CONFIRMATION EMAIL) ---------------- */
 app.post("/contact", async (req, res) => {
+  const { name, email, message } = req.body;
+
+  if (!name || !email || !message) {
+    return res.status(400).json({ success: false });
+  }
+
+  // respond immediately so frontend shows success + wax seal
+  res.json({ success: true });
+
   try {
-    const { name, email, message } = req.body;
-    if (!name || !email || !message)
-      return res.status(400).json({ message: "Missing fields" });
-
-    console.log("📩 Contact request:", name, email);
-
     const transporter = nodemailer.createTransport({
       service: "gmail",
       auth: {
@@ -173,23 +176,60 @@ app.post("/contact", async (req, res) => {
       },
     });
 
+    // EMAIL TO YOU (ADMIN)
+    await transporter.sendMail({
+      from: `"Honey’s Art Gallery" <${process.env.EMAIL_USER}>`,
+      to: process.env.EMAIL_USER,
+      subject: "📩 New Contact Form Message",
+      text: `
+Name: ${name}
+Email: ${email}
+
+Message:
+${message}
+      `,
+    });
+
+    // CONFIRMATION EMAIL TO CUSTOMER
     await transporter.sendMail({
       from: `"Honey’s Art Gallery" <${process.env.EMAIL_USER}>`,
       to: email,
-      subject: "We received your message 💌",
-      html: `<p>Hi ${name},</p><p>${message}</p><p>— Honey</p>`,
-    });
+      subject: "We’ve received your message — Honey’s Art Gallery",
+      html: `
+        <div style="font-family: Georgia, 'Times New Roman', serif; color:#2e2a26;">
+          <p>Dear ${name},</p>
 
-    res.json({ message: "Email sent" });
+          <p>
+            Thank you for reaching out to <strong>Honey’s Art Gallery</strong>.
+            Your message has been received with care.
+          </p>
+
+          <p>
+            Every inquiry — whether about prints, commissions, collaborations
+            or simple appreciation — is read personally.
+            You can expect a warm response within <strong>24 hours</strong>.
+          </p>
+
+          <p>Until then, may inspiration find you gently.</p>
+
+          <br/>
+          <p>Warm regards,</p>
+          <p><strong>Honey’s Art Gallery</strong></p>
+        </div>
+      `,
+    });
   } catch (err) {
-    console.error("❌ Email error:", err);
-    res.status(500).json({ message: "Email failed" });
+    console.error("❌ Contact email failed:", err);
   }
 });
 
 /* ---------------- ROOT ---------------- */
-app.get("/", (req, res) => res.send("Backend is live!"));
+app.get("/", (req, res) => {
+  res.send("Backend is live!");
+});
 
 /* ---------------- START ---------------- */
 const PORT = process.env.PORT || 8080;
-app.listen(PORT, () => console.log(`Backend running on port ${PORT}`));
+app.listen(PORT, () =>
+  console.log(`Backend running on port ${PORT}`)
+);
