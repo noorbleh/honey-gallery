@@ -18,11 +18,14 @@ export default function ContactPage() {
     setStatus("sending");
 
     try {
-      const res = await fetch("/api/contact", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
-      });
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/contact`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(form),
+        }
+      );
 
       if (res.ok) {
         setStatus("success");
@@ -43,7 +46,6 @@ export default function ContactPage() {
         fontFamily: "Playfair Display, serif",
       }}
     >
-      {/* PAGE TITLE */}
       <h1
         style={{
           textAlign: "center",
@@ -64,7 +66,6 @@ export default function ContactPage() {
         }}
       ></div>
 
-      {/* CARD */}
       <div
         style={{
           background: "white",
@@ -75,7 +76,6 @@ export default function ContactPage() {
           boxShadow: "0 8px 30px rgba(0,0,0,0.12)",
         }}
       >
-        {/* SUCCESS MESSAGE */}
         {status === "success" && (
           <div style={{ textAlign: "center", padding: "20px 0" }}>
             <WaxSeal />
@@ -114,7 +114,6 @@ export default function ContactPage() {
           </div>
         )}
 
-        {/* CONTACT FORM */}
         {status !== "success" && (
           <>
             <h2
@@ -207,7 +206,6 @@ export default function ContactPage() {
   );
 }
 
-/* SHARED INPUT STYLE */
 const inputStyle: React.CSSProperties = {
   width: "100%",
   padding: "12px 14px",
