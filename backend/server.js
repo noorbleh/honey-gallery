@@ -7,7 +7,22 @@ const admin = require("firebase-admin");
 const nodemailer = require("nodemailer");
 
 const app = express();
-app.use(cors());
+
+/* ---------------- CORS (FINAL FIX) ---------------- */
+app.use(
+  cors({
+    origin: [
+      "https://honeysartgalleryy.vercel.app",
+      "https://honeysartgalleryy-git-main-noorblehs-projects.vercel.app",
+    ],
+    methods: ["GET", "POST", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
+);
+
+// handle preflight explicitly
+app.options("*", cors());
+
 app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ extended: true, limit: "50mb" }));
 
@@ -20,7 +35,7 @@ function getDB() {
   if (db) return db;
 
   if (!process.env.GSERVICE_JSON) {
-    throw new Error("GSERVICE_JSON not available at runtime");
+    throw new Error("GSERVICE_JSON missing at runtime");
   }
 
   if (!admin.apps.length) {
