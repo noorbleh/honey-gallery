@@ -2,10 +2,10 @@
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
-const path = require("path");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const admin = require("firebase-admin");
+const nodemailer = require("nodemailer");
 
 const app = express();
 app.use(cors());
@@ -20,8 +20,9 @@ if (!process.env.GSERVICE_JSON) {
   process.exit(1);
 }
 
-let credential = admin.credential.cert(JSON.parse(process.env.GSERVICE_JSON));
-
+const credential = admin.credential.cert(
+  JSON.parse(process.env.GSERVICE_JSON)
+);
 admin.initializeApp({ credential });
 const db = admin.firestore();
 
@@ -134,7 +135,6 @@ app.get("/collections", async (req, res) => {
     ];
 
     const merged = Array.from(new Set([...defaultCollections, ...set]));
-
     res.json(merged.sort());
   } catch (err) {
     console.error("get collections error", err);
@@ -150,6 +150,45 @@ app.delete("/artworks/:id", verifyToken, async (req, res) => {
   } catch (err) {
     console.error("delete error", err);
     res.status(500).json({ message: "Error deleting artwork" });
+  }
+});
+
+// ---------------- CONTACT FORM (EMAIL) ----------------
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
+  },
+});
+
+app.post("/contact", async (req, res) => {
+  try {
+    console.log("📩 Contact request received:", req.body);
+
+    const { name, email, message } = req.body;
+    if (!name || !email || !message) {
+      return res.status(400).json({ message: "Missing fields" });
+    }
+
+    await transporter.sendMail({
+      from: `"Honey’s Art Gallery" <${process.env.EMAIL_USER}>`,
+      to: process.env.EMAIL_USER,
+      replyTo: email,
+      subject: `New Contact Message from ${name}`,
+      html: `
+        <h3>New Contact Form Submission</h3>
+        <p><strong>Name:</strong> ${name}</p>
+        <p><strong>Email:</strong> ${email}</p>
+        <p><strong>Message:</strong></p>
+        <p>${message}</p>
+      `,
+    });
+
+    res.json({ success: true });
+  } catch (err) {
+    console.error("❌ CONTACT EMAIL ERROR:", err);
+    res.status(500).json({ message: "Failed to send email" });
   }
 });
 
