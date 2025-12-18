@@ -4,7 +4,7 @@ const cors = require("cors");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const admin = require("firebase-admin");
-const nodemailer = require("nodemailer");
+const { Resend } = require("resend");
 
 const app = express();
 
@@ -27,6 +27,9 @@ admin.initializeApp({ credential });
 const db = admin.firestore();
 
 const SECRET = process.env.JWT_SECRET || "HONEY_GALLERY_SECRET";
+
+/* ---------------- RESEND INIT ---------------- */
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 /* ---------------- AUTH MIDDLEWARE ---------------- */
 function verifyToken(req, res, next) {
@@ -156,7 +159,7 @@ app.delete("/artworks/:id", verifyToken, async (req, res) => {
   }
 });
 
-/* ---------------- CONTACT (ADMIN + CONFIRMATION EMAIL) ---------------- */
+/* ---------------- CONTACT (RESEND) ---------------- */
 app.post("/contact", async (req, res) => {
   const { name, email, message } = req.body;
 
@@ -168,18 +171,10 @@ app.post("/contact", async (req, res) => {
   res.json({ success: true });
 
   try {
-    const transporter = nodemailer.createTransport({
-      service: "gmail",
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
-      },
-    });
-
-    // EMAIL TO YOU (ADMIN)
-    await transporter.sendMail({
-      from: `"Honey’s Art Gallery" <${process.env.EMAIL_USER}>`,
-      to: process.env.EMAIL_USER,
+    // ADMIN EMAIL
+    await resend.emails.send({
+      from: "Honey’s Art Gallery <onboarding@resend.dev>",
+      to: ["honeysartgalleryy@gmail.com"],
       subject: "📩 New Contact Form Message",
       text: `
 Name: ${name}
@@ -190,10 +185,10 @@ ${message}
       `,
     });
 
-    // CONFIRMATION EMAIL TO CUSTOMER
-    await transporter.sendMail({
-      from: `"Honey’s Art Gallery" <${process.env.EMAIL_USER}>`,
-      to: email,
+    // CUSTOMER CONFIRMATION EMAIL
+    await resend.emails.send({
+      from: "Honey’s Art Gallery <onboarding@resend.dev>",
+      to: [email],
       subject: "We’ve received your message — Honey’s Art Gallery",
       html: `
         <div style="font-family: Georgia, 'Times New Roman', serif; color:#2e2a26;">
@@ -219,7 +214,7 @@ ${message}
       `,
     });
   } catch (err) {
-    console.error("❌ Contact email failed:", err);
+    console.error("❌ Resend error:", err);
   }
 });
 
