@@ -101,7 +101,7 @@ export default function ContactPage() {
                 fontSize: "17px",
               }}
             >
-              We’ve emailed you a confirmation. 💌
+              We’ll get back to you shortly. 💌
             </p>
 
             <p
