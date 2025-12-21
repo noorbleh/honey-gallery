@@ -159,7 +159,7 @@ app.delete("/artworks/:id", verifyToken, async (req, res) => {
   }
 });
 
-/* ---------------- CONTACT (RESEND) ---------------- */
+/* ---------------- CONTACT (RESEND - ADMIN ONLY) ---------------- */
 app.post("/contact", async (req, res) => {
   const { name, email, message } = req.body;
 
@@ -167,11 +167,7 @@ app.post("/contact", async (req, res) => {
     return res.status(400).json({ success: false });
   }
 
-  // respond immediately so frontend shows success + wax seal
-  res.json({ success: true });
-
   try {
-    // ADMIN EMAIL
     await resend.emails.send({
       from: "Honey’s Art Gallery <onboarding@resend.dev>",
       to: ["honeysartgalleryy@gmail.com"],
@@ -185,36 +181,10 @@ ${message}
       `,
     });
 
-    // CUSTOMER CONFIRMATION EMAIL
-    await resend.emails.send({
-      from: "Honey’s Art Gallery <onboarding@resend.dev>",
-      to: [email],
-      subject: "We’ve received your message — Honey’s Art Gallery",
-      html: `
-        <div style="font-family: Georgia, 'Times New Roman', serif; color:#2e2a26;">
-          <p>Dear ${name},</p>
-
-          <p>
-            Thank you for reaching out to <strong>Honey’s Art Gallery</strong>.
-            Your message has been received with care.
-          </p>
-
-          <p>
-            Every inquiry — whether about prints, commissions, collaborations
-            or simple appreciation — is read personally.
-            You can expect a warm response within <strong>24 hours</strong>.
-          </p>
-
-          <p>Until then, may inspiration find you gently.</p>
-
-          <br/>
-          <p>Warm regards,</p>
-          <p><strong>Honey’s Art Gallery</strong></p>
-        </div>
-      `,
-    });
+    res.json({ success: true });
   } catch (err) {
-    console.error("❌ Resend error:", err);
+    console.error("❌ Contact email failed:", err);
+    res.status(500).json({ success: false });
   }
 });
 
