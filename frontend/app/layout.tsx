@@ -1,5 +1,6 @@
 import "./globals.css";
 import type { Metadata } from "next";
+import AmbientAudio from "@/components/AmbientAudio";
 
 export const metadata: Metadata = {
   title: "Honey's Art Gallery",
@@ -16,7 +17,12 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        {/* 🔊 GLOBAL AMBIENT AUDIO (persists across pages) */}
+        <AmbientAudio />
+
+        {children}
+      </body>
     </html>
   );
 }

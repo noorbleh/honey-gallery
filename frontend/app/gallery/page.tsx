@@ -4,6 +4,7 @@ import Link from "next/link";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
+import Navbar from "@/components/Navbar"; // ✅ ADDED
 
 interface CollectionItem {
   name: string;
@@ -86,98 +87,101 @@ export default function GalleryIndex() {
         ];
 
   return (
-    <div style={{ padding: "60px 10%" }}>
-      <h1
-        style={{
-          textAlign: "center",
-          fontSize: "48px",
-          marginBottom: "60px",
-          fontFamily: "Playfair Display, serif",
-          letterSpacing: "1px",
-        }}
-      >
-        Collections
-      </h1>
+    <>
+      <Navbar /> {/* ✅ ADDED */}
 
-      {/* LIST */}
-      <div style={{ display: "grid", gap: "40px" }}>
-        {items.map((name, idx) => {
-          const info = collectionDetails[name];
-          if (!info) return null;
+      <div style={{ padding: "60px 10%" }}>
+        <h1
+          style={{
+            textAlign: "center",
+            fontSize: "48px",
+            marginBottom: "60px",
+            fontFamily: "Playfair Display, serif",
+            letterSpacing: "1px",
+          }}
+        >
+          Collections
+        </h1>
 
-          // ⭐ FIX FOR CG PAGE ROUTING ⭐
-          const href =
-            name === "C&G Collection"
-              ? "/gallery/cg"
-              : `/gallery/${encodeURIComponent(name)}`;
+        {/* LIST */}
+        <div style={{ display: "grid", gap: "40px" }}>
+          {items.map((name, idx) => {
+            const info = collectionDetails[name];
+            if (!info) return null;
 
-          return (
-            <motion.div
-              key={idx}
-              initial={{ opacity: 0, y: 40 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.7 }}
-              viewport={{ once: true }}
-              style={{
-                background: "#eee6d9",
-                padding: "30px",
-                borderRadius: "12px",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                gap: "30px",
-              }}
-            >
-              {/* TEXT */}
-              <div style={{ maxWidth: "60%" }}>
-                <h2 style={{ fontSize: "32px", marginBottom: "8px" }}>
-                  {info.name}
-                </h2>
+            const href =
+              name === "C&G Collection"
+                ? "/gallery/cg"
+                : `/gallery/${encodeURIComponent(name)}`;
 
-                <p
-                  style={{
-                    opacity: 0.8,
-                    lineHeight: 1.6,
-                    fontSize: "16px",
-                    marginBottom: "18px",
-                  }}
-                >
-                  {info.description}
-                </p>
-
-                <Link
-                  href={href}
-                  style={{
-                    padding: "10px 22px",
-                    background: "#3c3029",
-                    color: "white",
-                    borderRadius: "8px",
-                    fontSize: "16px",
-                  }}
-                >
-                  Explore →
-                </Link>
-              </div>
-
-              {/* IMAGE */}
-              <motion.img
-                src={info.image}
-                alt={info.name}
-                initial={{ scale: 1.1, opacity: 0 }}
-                whileInView={{ scale: 1, opacity: 1 }}
-                transition={{ duration: 0.8 }}
+            return (
+              <motion.div
+                key={idx}
+                initial={{ opacity: 0, y: 40 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.7 }}
                 viewport={{ once: true }}
                 style={{
-                  width: "230px",
-                  height: "160px",
-                  objectFit: "cover",
+                  background: "#eee6d9",
+                  padding: "30px",
                   borderRadius: "12px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  gap: "30px",
                 }}
-              />
-            </motion.div>
-          );
-        })}
+              >
+                {/* TEXT */}
+                <div style={{ maxWidth: "60%" }}>
+                  <h2 style={{ fontSize: "32px", marginBottom: "8px" }}>
+                    {info.name}
+                  </h2>
+
+                  <p
+                    style={{
+                      opacity: 0.8,
+                      lineHeight: 1.6,
+                      fontSize: "16px",
+                      marginBottom: "18px",
+                    }}
+                  >
+                    {info.description}
+                  </p>
+
+                  <Link
+                    href={href}
+                    style={{
+                      padding: "10px 22px",
+                      background: "#3c3029",
+                      color: "white",
+                      borderRadius: "8px",
+                      fontSize: "16px",
+                    }}
+                  >
+                    Explore →
+                  </Link>
+                </div>
+
+                {/* IMAGE */}
+                <motion.img
+                  src={info.image}
+                  alt={info.name}
+                  initial={{ scale: 1.1, opacity: 0 }}
+                  whileInView={{ scale: 1, opacity: 1 }}
+                  transition={{ duration: 0.8 }}
+                  viewport={{ once: true }}
+                  style={{
+                    width: "230px",
+                    height: "160px",
+                    objectFit: "cover",
+                    borderRadius: "12px",
+                  }}
+                />
+              </motion.div>
+            );
+          })}
+        </div>
       </div>
-    </div>
+    </>
   );
 }

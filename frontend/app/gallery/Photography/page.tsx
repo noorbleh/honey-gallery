@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
+import Link from "next/link";
 
 // ---------------------- PHOTOS ----------------------
 const photos = [
@@ -23,42 +24,60 @@ const photos = [
 ];
 
 export default function PhotographyPage() {
-  const [audioOn, setAudioOn] = useState(false);
-
-  // HERO PARALLAX
   const { scrollY } = useScroll();
   const heroY = useTransform(scrollY, [0, 300], [0, -120]);
 
-  // CURSOR SPOTLIGHT
   const [cursor, setCursor] = useState({ x: -9999, y: -9999 });
+
   useEffect(() => {
-    const move = (e: MouseEvent) => setCursor({ x: e.clientX, y: e.clientY });
+    const move = (e: MouseEvent) =>
+      setCursor({ x: e.clientX, y: e.clientY });
     window.addEventListener("mousemove", move);
     return () => window.removeEventListener("mousemove", move);
   }, []);
 
-  // AMBIENT AUDIO
-  const toggleAmbient = () => {
-    setAudioOn((prev) => {
-      const next = !prev;
-      let audio = document.getElementById("ambient-audio") as HTMLAudioElement | null;
-      if (!audio) {
-        audio = document.createElement("audio");
-        audio.src = "/ambient.mp3";
-        audio.id = "ambient-audio";
-        audio.loop = true;
-        audio.volume = 0.18;
-        document.body.appendChild(audio);
-      }
-      next ? audio.play().catch(() => {}) : audio.pause();
-      return next;
-    });
-  };
-
   return (
     <div style={{ position: "relative", overflow: "hidden" }}>
-      
-      {/* SPOTLIGHT CURSOR */}
+      {/* ---------------- BACK TO GALLERY ---------------- */}
+      <div
+        style={{
+          position: "fixed",
+          top: "40px",
+          left: "6%",
+          zIndex: 50,
+        }}
+      >
+        <Link
+          href="/gallery"
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "8px",
+            color: "#3c3029",
+            fontFamily: "Playfair Display, serif",
+            fontSize: "16px",
+            textDecoration: "none",
+            opacity: 0.85,
+            transition: "0.3s",
+          }}
+        >
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="#3c3029"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M15 18l-6-6 6-6" />
+          </svg>
+          Back
+        </Link>
+      </div>
+
+      {/* ---------------- SPOTLIGHT ---------------- */}
       <div
         style={{
           pointerEvents: "none",
@@ -73,14 +92,14 @@ export default function PhotographyPage() {
         }}
       />
 
-      {/* FLOATING PARTICLES */}
-      <div className="particles"></div>
+      {/* ---------------- PARTICLES ---------------- */}
+      <div className="particles" />
 
-      {/* HERO */}
+      {/* ---------------- HERO ---------------- */}
       <motion.div
         style={{
           y: heroY,
-          paddingTop: "150px",
+          paddingTop: "140px",
           paddingBottom: "40px",
           position: "relative",
           zIndex: 5,
@@ -105,41 +124,18 @@ export default function PhotographyPage() {
         >
           Photography
         </motion.h1>
-
-        <motion.button
-          whileHover={{ scale: 1.12 }}
-          whileTap={{ scale: 0.93 }}
-          onClick={toggleAmbient}
-          style={{
-            margin: "30px auto 0",
-            display: "block",
-            padding: "12px 36px",
-            borderRadius: "30px",
-            border: "1.5px solid #3c3029",
-            background: "transparent",
-            color: "#3c3029",
-            fontSize: "18px",
-            cursor: "pointer",
-            fontFamily: "Playfair Display, serif",
-            boxShadow: "0 5px 18px rgba(0,0,0,0.16)",
-          }}
-        >
-          Ambient Sound: {audioOn ? "ON" : "OFF"}
-        </motion.button>
       </motion.div>
 
-      {/* IMAGE GALLERY */}
+      {/* ---------------- GALLERY ---------------- */}
       <div style={{ marginTop: "40px", paddingBottom: "140px" }}>
         {photos.map((p, i) => (
           <motion.div
             key={i}
             initial={{ opacity: 0, y: 140, scale: 0.92 }}
             whileInView={{ opacity: 1, y: 0, scale: 1 }}
-            transition={{
-              duration: 1.1,
-              ease: "easeOut",
-            }}
+            transition={{ duration: 1.1, ease: "easeOut" }}
             viewport={{ once: true, amount: 0.25 }}
+            className="photo-wrap"
             style={{
               marginBottom: "140px",
               display: "flex",
@@ -151,6 +147,7 @@ export default function PhotographyPage() {
               initial={{ x: i % 2 === 0 ? -80 : 80 }}
               whileInView={{ x: 0 }}
               transition={{ duration: 1, ease: "easeOut" }}
+              className="photo-img"
               style={{
                 width: "55%",
                 borderRadius: "22px",
@@ -162,7 +159,7 @@ export default function PhotographyPage() {
         ))}
       </div>
 
-      {/* GLOBAL STYLES */}
+      {/* ---------------- GLOBAL STYLES ---------------- */}
       <style jsx global>{`
         .particles {
           pointer-events: none;
@@ -182,6 +179,17 @@ export default function PhotographyPage() {
         @keyframes goldShimmer {
           0% { background-position: 0% 50%; }
           100% { background-position: 300% 50%; }
+        }
+
+        /* -------- MOBILE FIX -------- */
+        @media (max-width: 768px) {
+          .photo-img {
+            width: 100% !important;
+          }
+
+          .photo-wrap {
+            margin-bottom: 90px !important;
+          }
         }
       `}</style>
     </div>

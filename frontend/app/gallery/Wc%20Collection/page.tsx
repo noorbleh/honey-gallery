@@ -7,23 +7,28 @@ import Link from "next/link";
 // ---------------------- ARTWORKS ----------------------
 const artworks = [
   {
-    url: "https://res.cloudinary.com/doqshkcln/image/upload/v1764680796/IMG_20251130_000643_hfs8vc.png",
-    title: "Quiet Structure",
-    desc: "A minimalist, expressive wall composition exploring balance and abstract contrast.",
+    url: "https://res.cloudinary.com/doqshkcln/image/upload/v1764686042/IMG_20251201_023159_ebsloc.jpg",
+    title: "Warm Portrait",
+    desc: "A soft, emotionally rich oil portrait with warm tones and gentle structure.",
   },
   {
-    url: "https://res.cloudinary.com/doqshkcln/image/upload/v1764680804/IMG_20251130_000440_exhuyp.png",
-    title: "Chromatic Flow",
-    desc: "A vibrant flow of layered colors, depth, and playful abstract form.",
+    url: "https://res.cloudinary.com/doqshkcln/image/upload/v1764686039/Screenshot_2025-12-02_at_8.03.08_PM_zluihx.png",
+    title: "Golden Evening",
+    desc: "A dreamy evening composition blending golden hues with expressive brushwork.",
   },
   {
-    url: "https://res.cloudinary.com/doqshkcln/image/upload/v1764680815/IMG_20251130_000458_kl8lyy.png",
-    title: "Color Burst",
-    desc: "A bold color-focused artwork showcasing striking contrasts and energy.",
+    url: "https://res.cloudinary.com/doqshkcln/image/upload/v1764520966/IMG_20251129_175809_ezvcog.jpg",
+    title: "Soft Oil Study",
+    desc: "A tranquil oil painting study focusing on subtle gradients and calm textures.",
+  },
+  {
+    url: "https://res.cloudinary.com/doqshkcln/image/upload/v1764686056/IMG_20251129_175220_gxnogi.png",
+    title: "Crimson Bloom",
+    desc: "A bold and expressive oil work featuring depth, color, and organic movement.",
   },
 ];
 
-export default function WallCollection() {
+export default function WcCollection() {
   const { scrollY } = useScroll();
   const heroY = useTransform(scrollY, [0, 300], [0, -120]);
 
@@ -58,7 +63,6 @@ export default function WallCollection() {
             fontSize: "16px",
             textDecoration: "none",
             opacity: 0.85,
-            transition: "0.3s",
           }}
         >
           <svg
@@ -88,7 +92,6 @@ export default function WallCollection() {
             rgba(255,255,255,0.12),
             transparent 70%
           )`,
-          transition: "background 0.15s ease-out",
           zIndex: 1,
         }}
       />
@@ -123,7 +126,7 @@ export default function WallCollection() {
             animation: "goldShimmer 7s linear infinite",
           }}
         >
-          Wall Collection
+          Wc Collection
         </motion.h1>
 
         <motion.p
@@ -138,7 +141,7 @@ export default function WallCollection() {
             fontFamily: "Playfair Display, serif",
           }}
         >
-          A bold, expressive series of wall artworks filled with texture and depth.
+          A premium selection of expressive oil artworks.
         </motion.p>
       </motion.div>
 
@@ -179,7 +182,7 @@ export default function WallCollection() {
                 transition={{ duration: 1.15 }}
                 style={{
                   width: "100%",
-                  height: "750px",
+                  height: "650px",
                   objectFit: "cover",
                 }}
               />
