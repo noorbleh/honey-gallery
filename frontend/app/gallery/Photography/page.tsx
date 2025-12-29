@@ -106,24 +106,25 @@ export default function PhotographyPage() {
         }}
       >
         <motion.h1
-          initial={{ opacity: 0, y: 40 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1.4 }}
-          style={{
-            textAlign: "center",
-            fontSize: "90px",
-            fontFamily: "Playfair Display, serif",
-            letterSpacing: "2px",
-            background:
-              "linear-gradient(90deg,#3c3029,#a69283,#3c3029,#c8b8a8)",
-            WebkitBackgroundClip: "text",
-            color: "transparent",
-            backgroundSize: "300%",
-            animation: "goldShimmer 8s linear infinite",
-          }}
-        >
-          Photography
+        initial={{ opacity: 0, y: 40 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 1.4 }}
+        className="photography-title"
+        style={{
+                textAlign: "center",
+                fontFamily: "Playfair Display, serif",
+                letterSpacing: "2px",
+                background:
+                  "linear-gradient(90deg,#3c3029,#a69283,#3c3029,#c8b8a8)",
+                WebkitBackgroundClip: "text",
+                color: "transparent",
+                backgroundSize: "300%",
+                animation: "goldShimmer 8s linear infinite",
+              }}
+>
+              Photography
         </motion.h1>
+
       </motion.div>
 
       {/* ---------------- GALLERY ---------------- */}

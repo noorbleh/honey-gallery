@@ -7,9 +7,11 @@ import { motion, AnimatePresence } from "framer-motion";
 export default function Navbar() {
   const [isMobile, setIsMobile] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+
+  // 🔊 Ambient audio ON by default
   const [audioOn, setAudioOn] = useState(true);
 
-  // ---------------- SCREEN SIZE ----------------
+  /* ---------------- SCREEN SIZE ---------------- */
   useEffect(() => {
     const check = () => setIsMobile(window.innerWidth <= 768);
     check();
@@ -17,35 +19,76 @@ export default function Navbar() {
     return () => window.removeEventListener("resize", check);
   }, []);
 
-  // ---------------- AUDIO SYNC ----------------
+  /* ---------------- AMBIENT AUDIO (GLOBAL) ---------------- */
   useEffect(() => {
+    let audio = document.getElementById("ambient-audio") as HTMLAudioElement | null;
+
+    // Create audio once for entire site
+    if (!audio) {
+      audio = document.createElement("audio");
+      audio.id = "ambient-audio";
+      audio.src = "/ambient.mp3";
+      audio.loop = true;
+      audio.volume = 0.17;
+      audio.preload = "auto";
+      audio.setAttribute("playsinline", "true");
+      document.body.appendChild(audio);
+    }
+
+    const tryPlay = () => {
+      if (audioOn && audio!.paused) {
+        audio!.play().catch(() => {});
+      }
+    };
+
+    // Required browser user interaction
+    window.addEventListener("pointerdown", tryPlay, { once: true });
+    window.addEventListener("scroll", tryPlay, { once: true });
+    window.addEventListener("keydown", tryPlay, { once: true });
+
+    return () => {
+      window.removeEventListener("pointerdown", tryPlay);
+      window.removeEventListener("scroll", tryPlay);
+      window.removeEventListener("keydown", tryPlay);
+    };
+  }, [audioOn]);
+
+  const toggleAudio = () => {
     const audio = document.getElementById("ambient-audio") as HTMLAudioElement | null;
     if (!audio) return;
 
-    audioOn ? audio.play().catch(() => {}) : audio.pause();
-  }, [audioOn]);
+    if (audio.paused) {
+      audio.play().catch(() => {});
+      setAudioOn(true);
+    } else {
+      audio.pause();
+      setAudioOn(false);
+    }
+  };
 
+  /* ---------------- UI ---------------- */
   return (
     <>
       <nav
         style={{
-          width: "100%",
-          height: "72px",
           position: "fixed",
           top: 0,
           left: 0,
+          width: "100%",
+          height: "72px",
           zIndex: 200,
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          background: "rgba(255,255,255,0.2)",
+          padding: isMobile ? "0 16px" : "0 6%",
+          background: "rgba(255,255,255,0.25)",
           backdropFilter: "blur(25px)",
+          WebkitBackdropFilter: "blur(25px)",
           borderBottom: "1px solid rgba(0,0,0,0.06)",
           fontFamily: "Playfair Display, serif",
-          padding: isMobile ? "0 16px" : "0 6%",
         }}
       >
-        {/* LEFT */}
+        {/* LEFT (DESKTOP) */}
         {!isMobile && (
           <div style={{ display: "flex", gap: "28px", alignItems: "center" }}>
             <NavLink href="/">home</NavLink>
@@ -54,7 +97,7 @@ export default function Navbar() {
 
             {/* 🔊 AMBIENT TOGGLE */}
             <button
-              onClick={() => setAudioOn((p) => !p)}
+              onClick={toggleAudio}
               style={{
                 padding: "6px 14px",
                 borderRadius: "18px",
@@ -72,17 +115,18 @@ export default function Navbar() {
         )}
 
         {/* CENTER LOGO */}
-        <div style={{ position: "absolute", left: "50%", transform: "translateX(-50%)" }}>
-          <span
-            style={{
-              fontSize: "26px",
-              fontWeight: 600,
-              color: "#c7a66a",
-              letterSpacing: "2px",
-            }}
-          >
-            H
-          </span>
+        <div
+          style={{
+            position: "absolute",
+            left: "50%",
+            transform: "translateX(-50%)",
+            fontSize: "26px",
+            fontWeight: 600,
+            color: "#c7a66a",
+            letterSpacing: "2px",
+          }}
+        >
+          H
         </div>
 
         {/* RIGHT */}
@@ -105,8 +149,11 @@ export default function Navbar() {
               width: 40,
               height: 40,
               borderRadius: 8,
+              border: "1px solid rgba(0,0,0,0.1)",
               background: "rgba(255,255,255,0.6)",
               fontSize: 20,
+              cursor: "pointer",
+              backdropFilter: "blur(12px)",
             }}
           >
             ☰
@@ -124,18 +171,39 @@ export default function Navbar() {
             style={{
               position: "fixed",
               inset: 0,
-              background: "rgba(0,0,0,0.85)",
               zIndex: 500,
+              background: "rgba(0,0,0,0.85)",
+              display: "flex",
+              flexDirection: "column",
               paddingTop: "120px",
               textAlign: "center",
             }}
           >
+            <button
+              onClick={() => setMenuOpen(false)}
+              style={{
+                position: "absolute",
+                top: 24,
+                right: 20,
+                width: 42,
+                height: 42,
+                borderRadius: 10,
+                background: "rgba(255,255,255,0.1)",
+                color: "white",
+                fontSize: 20,
+                border: "none",
+              }}
+            >
+              ✕
+            </button>
+
             <MobileLink href="/" onClick={() => setMenuOpen(false)}>home</MobileLink>
             <MobileLink href="/gallery" onClick={() => setMenuOpen(false)}>portfolio</MobileLink>
             <MobileLink href="/prints" onClick={() => setMenuOpen(false)}>prints</MobileLink>
 
+            {/* MOBILE AMBIENT */}
             <button
-              onClick={() => setAudioOn((p) => !p)}
+              onClick={toggleAudio}
               style={{
                 marginTop: "40px",
                 padding: "10px 28px",
@@ -143,6 +211,7 @@ export default function Navbar() {
                 border: "1px solid #c7a66a",
                 background: audioOn ? "#c7a66a" : "transparent",
                 color: "white",
+                fontSize: "16px",
               }}
             >
               ambient {audioOn ? "on" : "off"}
@@ -154,10 +223,36 @@ export default function Navbar() {
   );
 }
 
+/* ---------------- LINKS ---------------- */
+
 function NavLink({ href, children }: { href: string; children: React.ReactNode }) {
+  const [hover, setHover] = useState(false);
+
   return (
-    <Link href={href} style={{ textDecoration: "none", color: "#3f372f" }}>
+    <Link
+      href={href}
+      onMouseEnter={() => setHover(true)}
+      onMouseLeave={() => setHover(false)}
+      style={{
+        position: "relative",
+        paddingBottom: "4px",
+        fontSize: "16px",
+        color: "#3f372f",
+        textDecoration: "none",
+      }}
+    >
       {children}
+      <span
+        style={{
+          position: "absolute",
+          left: 0,
+          bottom: 0,
+          width: hover ? "100%" : "0%",
+          height: "2px",
+          background: "#c7a66a",
+          transition: "width 0.3s ease",
+        }}
+      />
     </Link>
   );
 }
@@ -172,7 +267,17 @@ function MobileLink({
   onClick: () => void;
 }) {
   return (
-    <Link href={href} onClick={onClick} style={{ color: "white", fontSize: "28px" }}>
+    <Link
+      href={href}
+      onClick={onClick}
+      style={{
+        color: "white",
+        fontSize: "28px",
+        textDecoration: "none",
+        margin: "18px 0",
+        fontWeight: 300,
+      }}
+    >
       {children}
     </Link>
   );

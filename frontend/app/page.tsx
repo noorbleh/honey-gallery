@@ -139,93 +139,125 @@ export default function HomePage() {
       </section>
 
       {/* =====================================================
-          FEATURED COLLECTIONS
-      ====================================================== */}
-      <section
+    FEATURED COLLECTIONS (MOBILE FIXED)
+====================================================== */}
+<section
+  style={{
+    marginTop: "120px",
+    width: "100%",
+    display: "flex",
+    justifyContent: "center",
+  }}
+>
+  <motion.div
+    initial={{ opacity: 0, y: 20 }}
+    whileInView={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.8 }}
+    style={{
+      background: "#eae3d9",
+      borderRadius: "18px",
+      overflow: "hidden",
+      width: "92%",
+      maxWidth: "1200px",
+      boxShadow: "0px 10px 30px rgba(0,0,0,0.12)",
+
+      /* 🔑 RESPONSIVE FLEX */
+      display: "flex",
+      flexDirection: "row",
+    }}
+  >
+    {/* IMAGE */}
+    <div
+      style={{
+        width: "50%",
+      }}
+      className="collection-image"
+    >
+      <img
+        src="https://res.cloudinary.com/doqshkcln/image/upload/v1764686039/Screenshot_2025-12-02_at_8.03.08_PM_zluihx.png"
         style={{
-          marginTop: "120px",
           width: "100%",
-          display: "flex",
-          justifyContent: "center",
+          height: "100%",
+          objectFit: "cover",
+        }}
+      />
+    </div>
+
+    {/* TEXT */}
+    <div
+      style={{
+        width: "50%",
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "center",
+        alignItems: "center",
+        padding: "20px",
+        textAlign: "center",
+      }}
+      className="collection-text"
+    >
+      <h2
+        style={{
+          fontFamily: "Playfair Display, serif",
+          fontSize: "32px",
+          marginBottom: "12px",
+          color: "#3c3029",
         }}
       >
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-          style={{
-            background: "#eae3d9",
-            borderRadius: "18px",
-            overflow: "hidden",
-            width: "92%",
-            maxWidth: "1200px",
-            height: "300px",
-            display: "flex",
-            boxShadow: "0px 10px 30px rgba(0,0,0,0.12)",
-          }}
-        >
-          <img
-            src="https://res.cloudinary.com/doqshkcln/image/upload/v1764686039/Screenshot_2025-12-02_at_8.03.08_PM_zluihx.png"
-            style={{
-              width: "50%",
-              objectFit: "cover",
-              height: "100%",
-            }}
-          />
+        Explore Collections
+      </h2>
 
-          <div
-            style={{
-              width: "50%",
-              display: "flex",
-              flexDirection: "column",
-              justifyContent: "center",
-              alignItems: "center",
-              padding: "20px",
-              textAlign: "center",
-            }}
-          >
-            <h2
-              style={{
-                fontFamily: "Playfair Display, serif",
-                fontSize: "32px",
-                marginBottom: "12px",
-                color: "#3c3029",
-              }}
-            >
-              Explore Collections
-            </h2>
+      <p
+        style={{
+          color: "#53473f",
+          fontSize: "16px",
+          maxWidth: "340px",
+          marginBottom: "18px",
+          lineHeight: 1.6,
+        }}
+      >
+        Discover Honey’s curated graphite, charcoal and watercolour series,
+        each capturing emotion, detail, and quiet storytelling.
+      </p>
 
-            <p
-              style={{
-                color: "#53473f",
-                fontSize: "16px",
-                maxWidth: "340px",
-                marginBottom: "18px",
-                lineHeight: 1.6,
-              }}
-            >
-              Discover Honey’s curated graphite, charcoal and watercolour series,
-              each capturing emotion, detail, and quiet storytelling.
-            </p>
+      <motion.a
+        whileHover={{ scale: 1.06 }}
+        whileTap={{ scale: 0.94 }}
+        href="/gallery"
+        style={{
+          padding: "12px 26px",
+          background: "#3c3029",
+          color: "white",
+          borderRadius: "8px",
+          fontWeight: 600,
+          cursor: "pointer",
+          textDecoration: "none",
+        }}
+      >
+        View Collections
+      </motion.a>
+    </div>
+  </motion.div>
 
-            <motion.a
-              whileHover={{ scale: 1.06 }}
-              whileTap={{ scale: 0.94 }}
-              href="/gallery"
-              style={{
-                padding: "12px 26px",
-                background: "#3c3029",
-                color: "white",
-                borderRadius: "8px",
-                fontWeight: 600,
-                cursor: "pointer",
-              }}
-            >
-              View Collections
-            </motion.a>
-          </div>
-        </motion.div>
-      </section>
+  {/* ✅ MOBILE-ONLY FIX */}
+  <style jsx>{`
+    @media (max-width: 768px) {
+      .collection-image,
+      .collection-text {
+        width: 100% !important;
+      }
+
+      .collection-image img {
+        height: 240px !important;
+      }
+
+      section > div {
+        flex-direction: column !important;
+      }
+    }
+  `}</style>
+</section>
+
 
                        {/* =====================================================
           PRINTS PREVIEW — 3D MUSEUM SPOTLIGHT EFFECT
